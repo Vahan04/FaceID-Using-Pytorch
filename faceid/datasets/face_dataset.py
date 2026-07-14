@@ -52,7 +52,7 @@ class FaceDataset(Dataset):
 
         self._scan_dataset()
 
-        #self._dataset_summary()
+        self._dataset_summary()
     
     def _scan_dataset(self):
 
@@ -92,3 +92,35 @@ class FaceDataset(Dataset):
     
     def __len__(self):
         return len(self.image_paths)
+    
+    def _dataset_summary(self):
+
+        image_counts = [
+        len(images)
+        for images in self.person_to_images.values()
+    ]
+
+        print("=" * 50)
+        print("Dataset Summary")
+        print("=" * 50)
+
+        print(f"Images              : {len(self.image_paths)}")
+        print(f"Identities          : {len(self.person_to_label)}")
+
+        if len(self.person_to_label) > 0:
+            avg_images = len(self.image_paths) / len(self.person_to_label)
+        else:
+            avg_images = 0
+
+        print(f"Average/images ID   : {avg_images:.2f}")
+
+        if image_counts:
+            print(f"Min images          : {min(image_counts)}")
+            print(f"Max images          : {max(image_counts)}")
+        else:
+            print("Min images          : 0")
+            print("Max images          : 0")
+
+        print(f"Skipped identities  : {self.skipped_identities}")
+
+        print("=" * 50)
