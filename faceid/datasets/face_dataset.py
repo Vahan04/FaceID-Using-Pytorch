@@ -1,8 +1,11 @@
+from operator import index
 from pathlib import Path
 import random
 
+from sqlalchemy import label
+from streamlit import image
 from torch.utils.data import Dataset
-
+from PIL import Image
 
 class FaceDataset(Dataset):
     """
@@ -31,6 +34,10 @@ class FaceDataset(Dataset):
         super().__init__()
 
         self.root_dir = Path(root_dir)
+        if not self.root_dir.exists():
+                raise FileNotFoundError(
+        f"Dataset directory '{self.root_dir}' does not exist."
+    )
         self.transform = transform
 
         # Every image in the dataset
@@ -124,5 +131,65 @@ class FaceDataset(Dataset):
         print(f"Skipped identities  : {self.skipped_identities}")
 
         print("=" * 50)
+    def _load_image(self, image_path: Path) -> Image.Image:
+        """
+        Load an image from disk.
+        """
+
+        image = Image.open(image_path).convert("RGB")
+
+        if self.transform is not None:
+            image = self.transform(image)
+
+        return image
     
+    def _sample_positive(self, label: int, anchor_path: Path) -> Path:
+        """
+        Randomly sample another image of the same identity.
+        """
+
+        images = self.person_to_images[label]
+
+        positive = random.choice(images)
+
+        while positive == anchor_path:
+            positive = random.choice(images)
+
+        return positive
+    def _sample_negative(self, label: int) -> Path:
+
+        """
+        Randomly sample an image from a different identity.
+        """
+
+        labels = list(self.person_to_images.keys())
+
+        negative_label = random.choice(labels)
+
+        while negative_label == label:
+            negative_label = random.choice(labels)
+
+        while negative_label == label:
+            negative_label = random.choice(list(self.person_to_images.keys()))
+
+        negative = random.choice(self.person_to_images[negative_label])
+
+        return negative
     
+    def __getitem__(self, index):
+        """
+        Return one training triplet.
+        """
+
+        anchor_path = self.image_paths[index]
+
+        label = self.labels[index]
+        positive_path = self._sample_positive(label, anchor_path)
+        negative_path = self._sample_negative(label)
+
+        anchor_image = self._load_image(anchor_path)
+        positive_image = self._load_image(positive_path)
+        negative_image = self._load_image(negative_path)
+
+        #return (anchor_image, positive_image, negative_image, label, anchor_path, positive_path, negative_path )
+        return (anchor_image, positive_image, negative_image, label)
