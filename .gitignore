@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# VS Code
+.vscode/
+
+# PyTorch checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Logs
+logs/
+runs/
+
+# Dataset
+data/
+!data/.gitkeep
