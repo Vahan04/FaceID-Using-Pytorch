@@ -18,27 +18,50 @@ def main():
     print(f"Using device: {device}")
 
     transform = transforms.Compose([
-        transforms.Resize((160, 160)),
+        transforms.Resize((32, 32)),
         transforms.ToTensor(),
     ])
 
-    dataset = FaceDataset(
-        root_dir="data/lfw_funneled",
+    train_dataset = FaceDataset(
+        root_dir="dataset",
         transform=transform,
     )
 
     train_loader = DataLoader(
-        dataset,
+        train_dataset,
         batch_size=32,
         shuffle=True,
+        num_workers=0,
     )
+
+    val_loader = None
+
     model = FaceEmbeddingNet().to(device)
-    loss_fn = TripletLoss(margin=0.2)
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    model.parameters()
-    trainer = Trainer(model=model, loss_fn=loss_fn, optimizer=optimizer, train_loader=train_loader, device=device)
-    trainer.fit(num_epochs=1)
 
+    criterion = TripletLoss(margin=0.2)
 
+    optimizer = torch.optim.Adam(
+        model.parameters(),
+        lr=1e-3,
+    )
+
+    scheduler = torch.optim.lr_scheduler.StepLR(
+        optimizer,
+        step_size=10,
+        gamma=0.1,
+    )
+
+    trainer = Trainer(
+        model=model,
+        loss_fn=criterion,
+        optimizer=optimizer,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        device=device,
+        scheduler=scheduler,
+        checkpoint_dir="checkpoints",
+    )
+
+    trainer.fit(num_epochs=20)
 if __name__ == "__main__":
     main()
