@@ -213,7 +213,7 @@ triplets for Triplet Loss optimization.
 Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/FaceID.git
+git clone https://github.com/Vahan04/FaceID.git
 ```
 
 Go to the project
