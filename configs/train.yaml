@@ -1,0 +1,17 @@
+batch_size: 32
+
+epochs: 20
+
+learning_rate: 0.001
+
+optimizer: adam
+
+scheduler:
+  step_size: 10
+  gamma: 0.1
+
+checkpoint_dir: checkpoints
+
+num_workers: 0
+
+seed: 42

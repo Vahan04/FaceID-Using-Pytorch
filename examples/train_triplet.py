@@ -16,8 +16,8 @@ dataset = FaceDataset(
 
 anchor, positive, negative, label = dataset[0]
 
-print(anchor.shape)
-print(positive.shape)
-print(negative.shape)
-
-print(label)
+print(f"Anchor   : {anchor.shape}")
+print(f"Positive : {positive.shape}")
+print(f"Negative : {negative.shape}")
+print(f"Label    : {label}")
+print(anchor.min(), anchor.max())

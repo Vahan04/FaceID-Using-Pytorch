@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faceid"
+version = "1.0.0"
+description = "A modular face recognition framework built with PyTorch."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Vahan Arubjanyan" }
+]
+
+keywords = [
+    "deep-learning",
+    "pytorch",
+    "computer-vision",
+    "face-recognition",
+    "metric-learning",
+    "triplet-loss",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "torch",
+    "torchvision",
+    "Pillow",
+    "matplotlib",
+    "numpy",
+    "tqdm",
+    "tensorboard",
+]
+
+[project.urls]
+Homepage = "https://github.com/Vahan04/FaceID"
+Repository = "https://github.com/Vahan04/FaceID"
+Issues = "https://github.com/Vahan04/FaceID/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["faceid*"]

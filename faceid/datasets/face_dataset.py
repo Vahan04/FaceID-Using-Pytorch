@@ -1,12 +1,8 @@
-from operator import index
-from pathlib import Path
 import random
+from pathlib import Path
 
-from sqlalchemy import label
-from streamlit import image
-from torch.utils.data import Dataset
 from PIL import Image
-
+from torch.utils.data import Dataset
 class FaceDataset(Dataset):
     """
     Face Dataset for training with Triplet Loss.
@@ -46,6 +42,8 @@ class FaceDataset(Dataset):
         # Integer label for every image
         self.labels = []
 
+        self.samples = []
+
         # label -> list[Path]
         self.person_to_images = {}
 
@@ -59,8 +57,7 @@ class FaceDataset(Dataset):
 
         self._scan_dataset()
 
-        self._dataset_summary()
-    
+        self._dataset_summary()    
     def _scan_dataset(self):
 
         label = 0
@@ -94,12 +91,11 @@ class FaceDataset(Dataset):
                 self.image_paths.append(image_path)
                 self.labels.append(label)
 
+                self.samples.append((image_path, label))
+
             label += 1
-    
-    
     def __len__(self):
-        return len(self.image_paths)
-    
+        return len(self.image_paths)    
     def _dataset_summary(self):
 
         image_counts = [
@@ -141,8 +137,7 @@ class FaceDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image
-    
+        return image    
     def _sample_positive(self, label: int, anchor_path: Path) -> Path:
         """
         Randomly sample another image of the same identity.
@@ -174,8 +169,7 @@ class FaceDataset(Dataset):
 
         negative = random.choice(self.person_to_images[negative_label])
 
-        return negative
-    
+        return negative   
     def __getitem__(self, index):
         """
         Return one training triplet.
@@ -191,5 +185,5 @@ class FaceDataset(Dataset):
         positive_image = self._load_image(positive_path)
         negative_image = self._load_image(negative_path)
 
-        #return (anchor_image, positive_image, negative_image, label, anchor_path, positive_path, negative_path )
+        #return (anchor_image, positive_image, negative_image, label, anchor_path, positive_path, negative_path ) it for visualization triplet
         return (anchor_image, positive_image, negative_image, label)

@@ -1,12 +1,20 @@
 import torch
 
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 
 from faceid.datasets.face_dataset import FaceDataset
 from faceid.models.embedding_net import FaceEmbeddingNet
 from faceid.losses.triplet_loss import TripletLoss
 from faceid.trainers.trainer import Trainer
+from faceid.datasets import (FaceDataset, split_dataset_by_identity)
+
+DATASET_DIR = "data/lfw_funneled"
+CHECKPOINT_DIR = "checkpoints"
+
+BATCH_SIZE = 32
+TRAIN_RATIO = 0.8
+RANDOM_SEED = 42
 
 
 def main():
@@ -22,10 +30,23 @@ def main():
         transforms.ToTensor(),
     ])
 
-    train_dataset = FaceDataset(
-        root_dir="dataset",
-        transform=transform,
-    )
+    dataset = FaceDataset(root_dir=DATASET_DIR, transform=transform)
+
+    train_size = int(TRAIN_RATIO * len(dataset))
+    val_size = len(dataset) - train_size
+
+    generator = torch.Generator().manual_seed(RANDOM_SEED)
+
+    train_dataset, val_dataset = split_dataset_by_identity(dataset, train_ratio=0.8, seed=42)
+
+    print("=" * 50)
+    print("Dataset Split")
+    print("=" * 50)
+    print(f"Train identities : {len(train_dataset.person_to_images)}")
+    print(f"Validation IDs   : {len(val_dataset.person_to_images)}")
+    print(f"Train images     : {len(train_dataset)}")
+    print(f"Validation imgs  : {len(val_dataset)}")
+    print("=" * 50)
 
     train_loader = DataLoader(
         train_dataset,
@@ -34,7 +55,12 @@ def main():
         num_workers=0,
     )
 
-    val_loader = None
+    val_loader = DataLoader(
+        val_dataset,
+        batch_size=32,
+        shuffle=False,
+        num_workers=0,
+    )
 
     model = FaceEmbeddingNet().to(device)
 
@@ -59,9 +85,11 @@ def main():
         val_loader=val_loader,
         device=device,
         scheduler=scheduler,
-        checkpoint_dir="checkpoints",
+        checkpoint_dir=CHECKPOINT_DIR,
     )
 
     trainer.fit(num_epochs=20)
+
+
 if __name__ == "__main__":
     main()

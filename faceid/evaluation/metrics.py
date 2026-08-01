@@ -1,45 +1,95 @@
 import torch
 
-
-def euclidean_distance(
-    embedding1: torch.Tensor,
-    embedding2: torch.Tensor,
-) -> torch.Tensor:
+def accuracy(predictions: torch.Tensor, targets: torch.Tensor) -> float:
     """
-    Compute the Euclidean (L2) distance between two batches of embeddings.
+    Compute classification accuracy.
+    """
+
+    correct = (predictions == targets).sum().item()
+
+    return correct / len(targets)
+def verification_accuracy(predictions: torch.Tensor, targets: torch.Tensor) -> float:
+    """
+    Compute classification accuracy.
+    """
+
+    correct = (predictions == targets).sum().item()
+
+    return correct / len(targets)
+def precision(predictions: torch.Tensor, targets: torch.Tensor) -> float:
+
+    tp = ((predictions == 1) & (targets == 1)).sum().item()
+
+    fp = ((predictions == 1) & (targets == 0)).sum().item()
+
+    return tp / (tp + fp + 1e-8)
+
+def recall(predictions: torch.Tensor, targets: torch.Tensor) -> float:
+
+    tp = ((predictions == 1) & (targets == 1)).sum().item()
+
+    fn = ((predictions == 0) & (targets == 1)).sum().item()
+
+    return tp / (tp + fn + 1e-8)
+def f1_score(predictions: torch.Tensor, targets: torch.Tensor) -> float:
+
+    p = precision(predictions, targets)
+    r = recall(predictions, targets)
+
+    return 2 * p * r / (p + r + 1e-8)
+def euclidean_distance(embedding1: torch.Tensor, embedding2: torch.Tensor) -> torch.Tensor:
+    """
+    Compute the Euclidean distance between two embeddings.
 
     Args:
-        embedding1: Tensor of shape (batch_size, embedding_dim)
-        embedding2: Tensor of shape (batch_size, embedding_dim)
+        embedding1 (torch.Tensor): First embedding.
+        embedding2 (torch.Tensor): Second embedding.
 
     Returns:
-        Tensor of shape (batch_size,) containing the distance for each pair.
+        torch.Tensor: Euclidean distance between the two embeddings.
     """
 
-    return torch.norm(embedding1 - embedding2, p=2, dim=1)
-
-
-def verification_accuracy(
-    distances: torch.Tensor,
-    labels: torch.Tensor,
-    threshold: float,
-) -> float:
+    return torch.sqrt(torch.sum((embedding1 - embedding2) ** 2, dim=1))
+def cosine_similarity(embedding1: torch.Tensor, embedding2: torch.Tensor) -> torch.Tensor:
     """
-    Compute face verification accuracy.
+    Compute the cosine similarity between two embeddings.
 
     Args:
-        distances: Euclidean distances between embedding pairs.
-        labels:
-            1 -> same identity
-            0 -> different identity
-        threshold: Distance threshold.
+        embedding1 (torch.Tensor): First embedding.
+        embedding2 (torch.Tensor): Second embedding.
 
     Returns:
-        Verification accuracy.
+        torch.Tensor: Cosine similarity between the two embeddings.
     """
 
-    predictions = (distances < threshold).long()
+    dot_product = torch.sum(embedding1 * embedding2, dim=1)
+    
+    return dot_product   # Adding a small epsilon to avoid division by zero
 
-    correct = (predictions == labels).sum().item()
+import torch
 
-    return correct / len(labels)
+
+class Verifier:
+    """
+    Verifies whether two face embeddings belong to the same person
+    based on a distance threshold.
+    """
+
+    def __init__(self, threshold: float = 0.8):
+        self.threshold = threshold
+
+    def verify(self, distance: torch.Tensor) -> torch.Tensor:
+        """
+        Verify whether two embeddings belong to the same identity.
+
+        Args:
+            distance (torch.Tensor):
+                Euclidean distance between two embeddings.
+
+        Returns:
+            torch.Tensor:
+                Boolean tensor where True means the embeddings
+                belong to the same person.
+        """
+
+        return distance <= self.threshold

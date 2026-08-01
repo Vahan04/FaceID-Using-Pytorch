@@ -1,0 +1,7 @@
+embedding_dim: 128
+
+image_size: 32
+
+backbone: cnn
+
+l2_normalize: true

@@ -9,7 +9,8 @@ from faceid.datasets.face_dataset import FaceDataset
 
 
 def tensor_to_image(tensor):
-    return tensor.permute(1, 2, 0).numpy()
+    image = tensor.detach().cpu().permute(1, 2, 0).numpy()
+    return image.clip(0, 1)
 
 transform = transforms.Compose([
     transforms.Resize((160, 160)),
